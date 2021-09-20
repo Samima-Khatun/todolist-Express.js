@@ -7,11 +7,15 @@
     <div class="box">
       
         <%  for(let i=0; i<newListItems.length;i++){ %>
+
+          <form action="/delete" method="POST">
           <div class="item">
-            <input type="checkbox">
-              <p> <%= newListItems[i] %></p>
+            <input type="checkbox" value="<%=newListItems[i]._id%>" onChange="this.form.submit()" name="checkbox">
+              <p> <%= newListItems[i].name %></p>
           </div>
-           
+          <input type="hidden" name="listName" value=<%= listTitle %>></input>
+        </form> 
+
         <%  } %>
 
         <form class="item" action="/" method="POST">
@@ -23,7 +27,3 @@
     </div>
 
     <%- include("footer") -%>
-    
-
-    
-
