@@ -1,20 +1,22 @@
+require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const _ = require("lodash");
-//const date = require(__dirname + "/date.js");
 const app = express();
 
 app.set("view engine", "ejs");
-
-//const items = ["Buy Food", "Cook Food", "Eat Food"];
-//const workItems = [];
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 mongoose.connect(
-  "mongodb+srv://admin123:admin123@cluster0.273zx.mongodb.net/todolistDB",
+  "mongodb+srv://" +
+    process.env.MONGO_USERID +
+    ":" +
+    process.env.MONGO_PASSWORD +
+    "@cluster0.273zx.mongodb.net/todolistDB",
+
   {
     useNewUrlParser: true,
   }
@@ -48,9 +50,6 @@ const listSchema = {
 const List = mongoose.model("List", listSchema);
 
 app.get("/", function (req, res) {
-  //const day = date.getDate();
-  //res.render("list", { listTitle: day, newListItems: items });
-
   Item.find({}, function (err, foundItems) {
     if (foundItems.length === 0) {
       Item.insertMany(defaultItems, function (err) {
@@ -67,62 +66,24 @@ app.get("/", function (req, res) {
   });
 });
 
-app.get("/:customListName", function (req, res) {
-  const customListName = _.capitalize(req.params.customListName);
+app.get("/login", function (req, res) {
+  res.render("login");
+});
 
-  List.findOne({ name: customListName }, function (err, foundList) {
-    if (err) {
-      console.log(err);
-    } else {
-      if (!foundList) {
-        //Create a new list
-        //console.log("Doesn't exist!");
-        const list = new List({
-          name: customListName,
-          items: defaultItems,
-        });
-
-        list.save();
-        res.redirect("/" + customListName);
-      } else {
-        //Show an existing list
-        //console.log("Exists!");
-        res.render("list", {
-          listTitle: foundList.name,
-          newListItems: foundList.items,
-        });
-      }
-    }
-  });
+app.get("/register", function (req, res) {
+  res.render("register");
 });
 
 app.post("/", function (req, res) {
   const itemName = req.body.newItem;
-  const listName = req.body.list;
-
   const item = new Item({
     name: itemName,
   });
-
-  if (listName === "Today") {
-    item.save();
-    res.redirect("/");
-  } else {
-    List.findOne({ name: listName }, function (err, foundList) {
-      foundList.items.push(item);
-      foundList.save();
-      res.redirect("/" + listName);
-    });
-  }
-
-  /*const item = req.body.newItem;
-  if (req.body.list === "Work") {
-    workItems.push(item);
-    res.redirect("/work");
-  } else {
-    items.push(item);
-    res.redirect("/");
-  }*/
+  item.save(function (err, item) {
+    if (!err) {
+      res.redirect("/");
+    }
+  });
 });
 
 app.post("/delete", function (req, res) {
