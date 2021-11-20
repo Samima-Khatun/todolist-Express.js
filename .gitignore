@@ -120,7 +120,7 @@ dist
 
 # implementing
 implementing
-date.js
+date.ejs
 login.ejs
 register.ejs
 about.ejs
